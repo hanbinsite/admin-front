@@ -118,7 +118,8 @@ export default {
       // const routes = []
       const rules = this.loadMenu(res.data)
       this.serviceRoutes = rules
-      this.routes = this.generateRoutes(rules)
+      this.routes = rules
+      // this.routes = this.generateRoutes(rules)
     },
     async getRoles() {
       const res = await getGroups(this.listQuery)
@@ -191,9 +192,9 @@ export default {
         // const routes = this.generateRoutes(this.role.routes)
         getGroupRule({ groupId: scope.row.id }).then(res => {
           const routes = res.data
-          let routesLoad = this.loadMenu(routes)
-          routesLoad = this.generateRoutes(routesLoad)
-          this.$refs.tree.setCheckedNodes(this.generateArr(routesLoad))
+          // let routesLoad = this.loadMenu(routes)
+          // routesLoad = this.generateRoutes(routesLoad)
+          this.$refs.tree.setCheckedNodes(this.generateArr(this.loadMenu(routes)))
           // set checked state of a node not affects its father and child nodes
           this.checkStrictly = false
         })
@@ -257,18 +258,16 @@ export default {
         // this.rolesList.push(this.role)
       }
 
-      const { description, key, name } = this.role
+      // const { description, key, name } = this.role
       this.dialogVisible = false
       this.$notify({
         title: 'Success',
         dangerouslyUseHTMLString: true,
-        message: `
-            <div>Role Key: ${key}</div>
-            <div>Role Name: ${name}</div>
-            <div>Description: ${description}</div>
-          `,
+        message: '新增成功',
         type: 'success'
       })
+      this.listQuery.pageNum = 1
+      await this.getRoles()
     },
     // reference: src/view/layout/components/Sidebar/SidebarItem.vue
     onlyOneShowingChild(children = [], parent) {
