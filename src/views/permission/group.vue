@@ -3,22 +3,27 @@
     <el-button type="primary" @click="handleAddRole">新增</el-button>
 
     <el-table :data="rolesList" style="width: 100%;margin-top:30px;" border>
-      <el-table-column align="center" label="Role Key" width="220">
+      <el-table-column align="center" label="ID" width="220">
         <template slot-scope="scope">
-          {{ scope.row.key }}
+          {{ scope.row.id }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="Role Name" width="220">
+      <el-table-column align="center" label="分支名称" width="220">
         <template slot-scope="scope">
           {{ scope.row.name }}
         </template>
       </el-table-column>
-      <el-table-column align="header-center" label="Description">
+      <el-table-column align="header-center" label="描述">
         <template slot-scope="scope">
           {{ scope.row.description }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="Operations">
+      <el-table-column align="header-center" label="创建时间">
+        <template slot-scope="scope">
+          {{ scope.row.createdAt }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="操作">
         <template slot-scope="scope">
           <el-button type="primary" size="small" @click="handleEdit(scope)">编辑</el-button>
           <el-button type="danger" size="small" @click="handleDelete(scope)">删除</el-button>
@@ -26,34 +31,36 @@
       </el-table-column>
     </el-table>
 
-    <el-dialog :visible.sync="dialogVisible" :title="dialogType==='edit'?'Edit Role':'New Role'">
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.pageNum" :limit.sync="listQuery.pageSize" @pagination="getRoles" />
+
+    <el-dialog :visible.sync="dialogVisible" :title="dialogType==='edit'?'编辑':'新增'">
       <el-form :model="role" label-width="80px" label-position="left">
-        <el-form-item label="Name">
-          <el-input v-model="role.name" placeholder="Role Name" />
+        <el-form-item label="名称">
+          <el-input v-model="role.name" placeholder="请输入名称" />
         </el-form-item>
-        <el-form-item label="Desc">
+        <el-form-item label="说明">
           <el-input
             v-model="role.description"
             :autosize="{ minRows: 2, maxRows: 4}"
             type="textarea"
-            placeholder="Role Description"
+            placeholder="请输入说明"
           />
         </el-form-item>
-        <el-form-item label="Menus">
+        <el-form-item label="菜单">
           <el-tree
             ref="tree"
             :check-strictly="checkStrictly"
             :data="routesData"
             :props="defaultProps"
             show-checkbox
-            node-key="path"
+            node-key="id"
             class="permission-tree"
           />
         </el-form-item>
       </el-form>
       <div style="text-align:right;">
-        <el-button type="danger" @click="dialogVisible=false">Cancel</el-button>
-        <el-button type="primary" @click="confirmRole">Confirm</el-button>
+        <el-button type="danger" @click="dialogVisible=false">取消</el-button>
+        <el-button type="primary" @click="confirmRole">确定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -62,16 +69,19 @@
 <script>
 import path from 'path'
 import { deepClone } from '@/utils'
-import { getRoutes, getRoles, addRole, deleteRole, updateRole } from '@/api/role'
+import { addGroup, deleteGroup, getGroupRoles, getGroups, updateGroup, getGroupRule } from '@/api/group'
+import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
 const defaultRole = {
   key: '',
   name: '',
   description: '',
-  routes: []
+  routes: [],
+  rules: []
 }
 
 export default {
+  components: { Pagination },
   data() {
     return {
       role: Object.assign({}, defaultRole),
@@ -83,11 +93,17 @@ export default {
       defaultProps: {
         children: 'children',
         label: 'title'
+      },
+      total: 0,
+      listQuery: {
+        pageNum: 1,
+        pageSize: 20
       }
     }
   },
   computed: {
     routesData() {
+      console.log(this.routes)
       return this.routes
     }
   },
@@ -98,13 +114,21 @@ export default {
   },
   methods: {
     async getRoutes() {
-      const res = await getRoutes()
-      this.serviceRoutes = res.data
-      this.routes = this.generateRoutes(res.data)
+      const res = await getGroupRoles()
+      // const routes = []
+      const rules = this.loadMenu(res.data)
+      this.serviceRoutes = rules
+      this.routes = this.generateRoutes(rules)
     },
     async getRoles() {
-      const res = await getRoles()
-      this.rolesList = res.data
+      const res = await getGroups(this.listQuery)
+      // fetchList(this.listQuery).then(response => {
+      //   this.list = response.data.items
+      //   this.total = response.data.total
+      //   this.listLoading = false
+      // })
+      this.rolesList = res.data.list
+      this.total = res.data.totalSize
     },
 
     // Reshape the routes structure so that it looks the same as the sidebar
@@ -115,15 +139,17 @@ export default {
         // skip some route
         if (route.hidden) { continue }
 
-        const onlyOneShowingChild = this.onlyOneShowingChild(route.children, route)
+        if (route.children) {
+          const onlyOneShowingChild = this.onlyOneShowingChild(route.children, route)
 
-        if (route.children && onlyOneShowingChild && !route.alwaysShow) {
-          route = onlyOneShowingChild
+          if (route.children && onlyOneShowingChild && !route.alwaysShow) {
+            route = onlyOneShowingChild
+          }
         }
-
         const data = {
           path: path.resolve(basePath, route.path),
-          title: route.meta && route.meta.title
+          title: route.meta && route.meta.title,
+          id: route.id
 
         }
 
@@ -162,10 +188,15 @@ export default {
       this.checkStrictly = true
       this.role = deepClone(scope.row)
       this.$nextTick(() => {
-        const routes = this.generateRoutes(this.role.routes)
-        this.$refs.tree.setCheckedNodes(this.generateArr(routes))
-        // set checked state of a node not affects its father and child nodes
-        this.checkStrictly = false
+        // const routes = this.generateRoutes(this.role.routes)
+        getGroupRule({ groupId: scope.row.id }).then(res => {
+          const routes = res.data
+          let routesLoad = this.loadMenu(routes)
+          routesLoad = this.generateRoutes(routesLoad)
+          this.$refs.tree.setCheckedNodes(this.generateArr(routesLoad))
+          // set checked state of a node not affects its father and child nodes
+          this.checkStrictly = false
+        })
       })
     },
     handleDelete({ $index, row }) {
@@ -175,7 +206,7 @@ export default {
         type: 'warning'
       })
         .then(async() => {
-          await deleteRole(row.key)
+          await deleteGroup(row.key)
           this.rolesList.splice($index, 1)
           this.$message({
             type: 'success',
@@ -205,10 +236,14 @@ export default {
       const isEdit = this.dialogType === 'edit'
 
       const checkedKeys = this.$refs.tree.getCheckedKeys()
-      this.role.routes = this.generateTree(deepClone(this.serviceRoutes), '/', checkedKeys)
+      console.log(checkedKeys)
+
+      // this.role.routes = this.generateTree(deepClone(this.serviceRoutes), '/', checkedKeys)
+      this.role.rules = checkedKeys
+      console.log(this.role.routes)
 
       if (isEdit) {
-        await updateRole(this.role.key, this.role)
+        await updateGroup(this.role.key, this.role)
         for (let index = 0; index < this.rolesList.length; index++) {
           if (this.rolesList[index].key === this.role.key) {
             this.rolesList.splice(index, 1, Object.assign({}, this.role))
@@ -216,9 +251,10 @@ export default {
           }
         }
       } else {
-        const { data } = await addRole(this.role)
-        this.role.key = data.key
-        this.rolesList.push(this.role)
+        // const { data } = await addGroup(this.role)
+        await addGroup(this.role)
+        // this.role.key = data.key
+        // this.rolesList.push(this.role)
       }
 
       const { description, key, name } = this.role
@@ -253,6 +289,24 @@ export default {
       }
 
       return false
+    },
+    loadMenu(menu) {
+      const rules = []
+      for (let i = 0; i < menu.length; i++) {
+        const rule = menu[i]
+        rule['meta'] = {
+          'affix': menu[i]['affix'] === 1,
+          'noCache': menu[i]['noCache'] === 1,
+          'icon': menu[i]['icon'] !== '' ? menu[i]['icon'] : '',
+          'title': menu[i]['title'] !== '' ? menu[i]['title'] : '',
+          'activeMenu': menu[i]['activeMenu'] !== '' ? menu[i]['activeMenu'] : ''
+        }
+        if (menu[i]['children']) {
+          rule['children'] = this.loadMenu(menu[i]['children'])
+        }
+        rules.push(rule)
+      }
+      return rules
     }
   }
 }

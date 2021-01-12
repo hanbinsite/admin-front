@@ -167,6 +167,14 @@ export const asyncRoutes = [
           title: '角色管理',
           roles: ['admin']
         }
+      },
+      {
+        path: 'group',
+        component: () => import('@/views/permission/group'),
+        name: 'GroupPermission',
+        meta: {
+          title: '分组管理'
+        }
       }
     ]
   },

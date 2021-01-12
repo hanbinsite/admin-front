@@ -1,16 +1,17 @@
 import request from '@/utils/request'
+import requestTest from '@/utils/request-test'
 
 export function login(data) {
-  return request({
-    url: '/vue-element-admin/user/login',
+  return requestTest({
+    url: '/admin/login',
     method: 'post',
     data
   })
 }
 
 export function getInfo(token) {
-  return request({
-    url: '/vue-element-admin/user/info',
+  return requestTest({
+    url: '/admin/info',
     method: 'get',
     params: { token }
   })
