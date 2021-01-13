@@ -25,7 +25,7 @@ export function addGroup(data) {
 
 export function updateGroup(id, data) {
   return request({
-    url: `/vue-element-admin/role/${id}`,
+    url: `/group/edit/${id}`,
     method: 'put',
     data
   })
@@ -33,7 +33,7 @@ export function updateGroup(id, data) {
 
 export function deleteGroup(id) {
   return request({
-    url: `/vue-element-admin/role/${id}`,
+    url: `/group/del/${id}`,
     method: 'delete'
   })
 }

@@ -132,7 +132,7 @@ export const asyncRoutes = [
   {
     path: '/permission',
     component: Layout,
-    redirect: '/permission/page',
+    redirect: '/permission/group',
     alwaysShow: true, // will always show the root menu
     name: 'Permission',
     meta: {
@@ -141,40 +141,71 @@ export const asyncRoutes = [
       roles: ['admin', 'editor'] // you can set roles in root nav
     },
     children: [
-      {
-        path: 'page',
-        component: () => import('@/views/permission/page'),
-        name: 'PagePermission',
-        meta: {
-          title: '角色选择',
-          roles: ['admin'] // or you can only set roles in sub nav
-        }
-      },
-      {
-        path: 'directive',
-        component: () => import('@/views/permission/directive'),
-        name: 'DirectivePermission',
-        meta: {
-          title: '角色切换'
-          // if do not set roles, means: this page does not require permission
-        }
-      },
-      {
-        path: 'role',
-        component: () => import('@/views/permission/role'),
-        name: 'RolePermission',
-        meta: {
-          title: '角色管理',
-          roles: ['admin']
-        }
-      },
+      // {
+      //   path: 'page',
+      //   component: () => import('@/views/permission/page'),
+      //   name: 'PagePermission',
+      //   meta: {
+      //     title: '角色选择',
+      //     roles: ['admin'] // or you can only set roles in sub nav
+      //   }
+      // },
+      // {
+      //   path: 'directive',
+      //   component: () => import('@/views/permission/directive'),
+      //   name: 'DirectivePermission',
+      //   meta: {
+      //     title: '角色切换'
+      //     // if do not set roles, means: this page does not require permission
+      //   }
+      // },
+      // {
+      //   path: 'role',
+      //   component: () => import('@/views/permission/role'),
+      //   name: 'RolePermission',
+      //   meta: {
+      //     title: '角色管理',
+      //     roles: ['admin']
+      //   }
+      // },
       {
         path: 'group',
         component: () => import('@/views/permission/group'),
         name: 'GroupPermission',
         meta: {
-          title: '分组管理'
+          title: '分组管理',
+          icon: 'tree'
         }
+      },
+      {
+        path: 'rule',
+        component: () => import('@/views/components-demo/index'),
+        name: 'RulePermission',
+        redirect: '/permission/rule/index',
+        meta: {
+          title: '菜单管理',
+          icon: 'el-icon-menu'
+        },
+        children: [
+          {
+            path: 'index',
+            component: () => import('@/views/permission/rule/index'),
+            name: 'RuleIndex',
+            meta: {
+              title: '菜单管理'
+            }
+          },
+          {
+            path: 'add',
+            component: () => import('@/views/permission/rule/add'),
+            name: 'RuleAdd',
+            hidden: true,
+            meta: {
+              title: '新增菜单',
+              icon: 'el-icon-menu'
+            }
+          }
+        ]
       }
     ]
   },

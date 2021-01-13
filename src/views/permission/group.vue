@@ -201,18 +201,20 @@ export default {
       })
     },
     handleDelete({ $index, row }) {
-      this.$confirm('Confirm to remove the role?', 'Warning', {
-        confirmButtonText: 'Confirm',
-        cancelButtonText: 'Cancel',
+      this.$confirm('确定删除分组?', '删除', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
         type: 'warning'
       })
         .then(async() => {
-          await deleteGroup(row.key)
+          await deleteGroup(row.id)
           this.rolesList.splice($index, 1)
           this.$message({
             type: 'success',
-            message: 'Delete succed!'
+            message: '删除成功'
           })
+          this.listQuery.pageNum = 1
+          await this.getRoles()
         })
         .catch(err => { console.error(err) })
     },
@@ -244,12 +246,12 @@ export default {
       console.log(this.role.routes)
 
       if (isEdit) {
-        await updateGroup(this.role.key, this.role)
+        await updateGroup(this.role.id, this.role)
         for (let index = 0; index < this.rolesList.length; index++) {
-          if (this.rolesList[index].key === this.role.key) {
-            this.rolesList.splice(index, 1, Object.assign({}, this.role))
-            break
-          }
+          // if (this.rolesList[index].key === this.role.key) {
+          //   this.rolesList.splice(index, 1, Object.assign({}, this.role))
+          //   break
+          // }
         }
       } else {
         // const { data } = await addGroup(this.role)
@@ -261,9 +263,9 @@ export default {
       // const { description, key, name } = this.role
       this.dialogVisible = false
       this.$notify({
-        title: 'Success',
+        title: '成功',
         dangerouslyUseHTMLString: true,
-        message: '新增成功',
+        message: '保存成功',
         type: 'success'
       })
       this.listQuery.pageNum = 1
