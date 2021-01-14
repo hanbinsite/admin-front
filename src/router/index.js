@@ -202,7 +202,8 @@ export const asyncRoutes = [
             hidden: true,
             meta: {
               title: '新增菜单',
-              icon: 'el-icon-menu'
+              icon: 'el-icon-menu',
+              activeMenu: '/permission/rule/index'
             }
           }
         ]

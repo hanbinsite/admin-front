@@ -6,3 +6,11 @@ export function getRules() {
     method: 'get'
   })
 }
+
+export function addRule(data) {
+  return request({
+    url: '/rule/add',
+    method: 'post',
+    data
+  })
+}

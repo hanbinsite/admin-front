@@ -1,7 +1,9 @@
 <template>
   <div class="app-container">
-    <router-link class="pan-btn blue-btn" to="/permission/rule/add">
-      新增
+    <router-link to="/permission/rule/add">
+      <el-button type="success" size="small">
+        新增
+      </el-button>
     </router-link>
     <el-table v-loading="listLoading" :data="list" row-key="id" border fit highlight-current-row style="width: 100%;margin-top: 30px;" :tree-props="{children: 'children', hasChildren: 'hasChildren'}">>
       <el-table-column align="center" label="ID" width="80">
@@ -86,10 +88,9 @@
       <el-table-column align="center" label="操作" width="120">
         <template slot-scope="scope">
           <router-link :to="'/example/edit/'+scope.row.id">
-            <el-button type="primary" size="small" icon="el-icon-edit">
-              编辑
-            </el-button>
+            <el-button type="primary" size="mini" icon="el-icon-edit" />
           </router-link>
+          <el-button type="danger" size="mini" icon="el-icon-delete" />
         </template>
       </el-table-column>
     </el-table>
