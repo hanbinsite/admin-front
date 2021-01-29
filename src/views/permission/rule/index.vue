@@ -5,7 +5,7 @@
         新增
       </el-button>
     </router-link>
-    <el-table v-loading="listLoading" :data="list" row-key="id" border fit highlight-current-row style="width: 100%;margin-top: 30px;" :tree-props="{children: 'children', hasChildren: 'hasChildren'}">>
+    <el-table v-loading="listLoading" :data="list" row-key="id" border fit highlight-current-row style="width: 100%;margin-top: 30px;" :tree-props="{children: 'children'}">>
       <el-table-column align="center" label="ID" width="80">
         <template slot-scope="scope">
           <span>{{ scope.row.id }}</span>
@@ -14,7 +14,7 @@
 
       <el-table-column min-width="120px" label="标题">
         <template slot-scope="{row}">
-          <router-link :to="'/example/edit/'+row.id" class="link-type">
+          <router-link :to="'/permission/rule/edit/'+row.id" class="link-type">
             <span>{{ row.title }}</span>
           </router-link>
         </template>
@@ -87,10 +87,10 @@
 
       <el-table-column align="center" label="操作" width="120">
         <template slot-scope="scope">
-          <router-link :to="'/example/edit/'+scope.row.id">
+          <router-link :to="'/permission/rule/edit/'+scope.row.id">
             <el-button type="primary" size="mini" icon="el-icon-edit" />
           </router-link>
-          <el-button type="danger" size="mini" icon="el-icon-delete" />
+          <el-button type="danger" size="mini" icon="el-icon-delete" @click="handleDelRule(scope.row.id)" />
         </template>
       </el-table-column>
     </el-table>
@@ -99,7 +99,7 @@
 </template>
 
 <script>
-import { getRules } from '@/api/rule'
+import { getRules, delRule } from '@/api/rule'
 
 export default {
   name: 'RulePermission',
@@ -138,6 +138,23 @@ export default {
       // }
       // this.dialogType = 'new'
       // this.dialogVisible = true
+    },
+    handleDelRule(id) {
+      this.$confirm('此操作不可撤回，是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        delRule(id).then(res => {
+          this.$notify({
+            title: '成功',
+            dangerouslyUseHTMLString: true,
+            message: '删除成功',
+            type: 'success'
+          })
+          this.getList()
+        })
+      })
     }
   }
 }

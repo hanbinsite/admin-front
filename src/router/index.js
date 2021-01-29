@@ -205,6 +205,13 @@ export const asyncRoutes = [
               icon: 'el-icon-menu',
               activeMenu: '/permission/rule/index'
             }
+          },
+          {
+            path: 'edit/:id(\\d+)',
+            component: () => import('@/views/permission/rule/edit'),
+            name: 'RuleEdit',
+            meta: { title: '编辑菜单', noCache: true, activeMenu: '/permission/rule/index' },
+            hidden: true
           }
         ]
       }

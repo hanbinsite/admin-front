@@ -14,3 +14,25 @@ export function addRule(data) {
     data
   })
 }
+
+export function infoRule(id) {
+  return request({
+    url: '/rule/info/' + id,
+    method: 'get'
+  })
+}
+
+export function editRule(id, data) {
+  return request({
+    url: '/rule/edit/' + id,
+    method: 'post',
+    data
+  })
+}
+
+export function delRule(id) {
+  return request({
+    url: `/rule/del/${id}`,
+    method: 'delete'
+  })
+}

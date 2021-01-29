@@ -69,7 +69,7 @@
 </template>
 <script>
 import { getGroupRoles } from '@/api/group'
-import { addRule } from '@/api/rule'
+import { addRule, infoRule, editRule } from '@/api/rule'
 
 export default {
   name: 'RuleDetail',
@@ -136,13 +136,16 @@ export default {
           { required: true, message: '请选择是否隐藏', trigger: 'change' }
         ]
       },
-      parentList: []
+      parentList: [],
+      id: 0
     }
   },
   created() {
     this.initRule()
     if (this.isEdit) {
-      // const id = this.$route.params && this.$route.params.id
+      const id = this.$route.params && this.$route.params.id
+      this.id = id
+      this.initInfoRule(id)
       // this.fetchData(id)
     }
 
@@ -155,8 +158,12 @@ export default {
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
+          if (this.ruleForm.parentId === '') {
+            this.ruleForm.parentId = 0
+          }
           if (this.isEdit) {
-            console.log('编辑')
+            editRule(this.id, this.ruleForm).then(res => {
+            })
           } else {
             addRule(this.ruleForm).then(res => {
             })
@@ -216,6 +223,15 @@ export default {
         }
       }
       return rules
+    },
+    initInfoRule(id) {
+      infoRule(id).then(res => {
+        this.ruleForm = res.data
+        if (this.ruleForm.parentId === 0) {
+          this.ruleForm.parentId = ''
+        }
+        console.log(res)
+      })
     }
   }
 }
