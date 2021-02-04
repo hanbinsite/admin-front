@@ -1,79 +1,58 @@
 <template>
   <div class="app-container">
-    <router-link to="/permission/rule/add">
-      <el-button type="success" size="small">
-        新增
+    <div class="filter-container">
+      <el-input v-model="listQuery.search" placeholder="用户名/昵称" clearable style="width: 200px;" class="filter-item" />
+      <el-select v-model="listQuery.groupId" placeholder="分组" clearable style="width: 90px" class="filter-item">
+        <el-option v-for="item in groupOptions" :key="item.id" :label="item.name" :value="item.id" />
+      </el-select>
+      <el-select v-model="listQuery.status" placeholder="状态" clearable class="filter-item" style="width: 130px">
+        <el-option v-for="item in statusOptions" :key="item.id" :label="item.name" :value="item.id" />
+      </el-select>
+      <el-button class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
+        搜索
       </el-button>
-    </router-link>
-    <el-table v-loading="listLoading" :data="list" row-key="id" border fit highlight-current-row style="width: 100%;margin-top: 30px;" :tree-props="{children: 'children'}">>
+      <router-link to="/permission/admin/add">
+        <el-button class="filter-item" style="margin-left: 10px;" type="success" icon="el-icon-edit" @click="handleCreate">
+          新增
+        </el-button>
+      </router-link>
+    </div>
+    <el-table v-loading="listLoading" :data="list" row-key="id" border fit highlight-current-row style="width: 100%;">
       <el-table-column align="center" label="ID" width="80">
         <template slot-scope="scope">
           <span>{{ scope.row.id }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column min-width="120px" label="标题">
+      <el-table-column width="150px" align="center" label="所在分组">
+        <template slot-scope="scope">
+          <span>{{ scope.row.groupName }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column width="150px" align="center" label="手机号">
+        <template slot-scope="scope">
+          <span>{{ scope.row.mobile }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column width="120px" label="用户名">
         <template slot-scope="{row}">
-          <router-link :to="'/permission/rule/edit/'+row.id" class="link-type">
-            <span>{{ row.title }}</span>
+          <router-link :to="'/permission/admin/edit/'+row.id" class="link-type">
+            <span>{{ row.username }}</span>
           </router-link>
         </template>
       </el-table-column>
 
-      <el-table-column width="150px" align="center" label="路由名称">
+      <el-table-column width="150px" align="center" label="昵称">
         <template slot-scope="scope">
-          <span>{{ scope.row.name }}</span>
+          <span>{{ scope.row['nickname'] }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="120px" align="center" label="路径">
+      <el-table-column width="200px" align="center" label="邮箱">
         <template slot-scope="scope">
-          <span>{{ scope.row.path }}</span>
-        </template>
-      </el-table-column>
-
-      <el-table-column width="120px" align="center" label="页面路径">
-        <template slot-scope="scope">
-          <span>{{ scope.row.component }}</span>
-        </template>
-      </el-table-column>
-
-      <el-table-column width="120px" align="center" label="菜单">
-        <template slot-scope="scope">
-          <span>{{ scope.row.hidden ? '否' : '是' }}</span>
-        </template>
-      </el-table-column>
-
-      <el-table-column width="120px" align="center" label="重定向路径">
-        <template slot-scope="scope">
-          <span>{{ scope.row.redirect }}</span>
-        </template>
-      </el-table-column>
-
-      <el-table-column width="120px" align="center" label="接口地址">
-        <template slot-scope="scope">
-          <span>{{ scope.row.api }}</span>
-        </template>
-      </el-table-column>
-
-      <el-table-column width="120px" align="center" label="排序">
-        <template slot-scope="scope">
-          <span>{{ scope.row.sort }}</span>
-        </template>
-      </el-table-column>
-
-      <el-table-column width="120px" align="center" label="其他属性">
-        <template slot-scope="scope">
-          <p>是否缓存:{{ scope.row.noCache ? '不缓存' : '缓存' }}</p>
-          <p>所属菜单:{{ scope.row.activeMenu ? scope.row.activeMenu : '无' }}</p>
-          <p>固定：{{ scope.row.affix ? '是' : '否' }}</p>
-        </template>
-      </el-table-column>
-
-      <el-table-column width="100px" label="图标">
-        <template slot-scope="scope">
-          <i v-if="scope.row.icon !== '' && scope.row.icon.includes('el-icon')" :class="scope.row.icon" />
-          <svg-icon v-else-if="scope.row.icon !== ''" :icon-class="scope.row.icon" class="meta-item__icon" />
+          <span>{{ scope.row['mail'] }}</span>
         </template>
       </el-table-column>
 
@@ -85,12 +64,25 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="操作" width="120">
+      <el-table-column width="250px" align="center" label="创建时间">
         <template slot-scope="scope">
-          <router-link :to="'/permission/rule/edit/'+scope.row.id">
+          <span>{{ scope.row.createdAt }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column width="250px" align="center" label="更新时间">
+        <template slot-scope="scope">
+          <span>{{ scope.row['updatedAt'] }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column align="center" label="操作" width="205">
+        <template slot-scope="scope">
+          <router-link :to="'/permission/admin/edit/'+scope.row.id">
             <el-button type="primary" size="mini" icon="el-icon-edit" />
           </router-link>
-          <el-button type="danger" size="mini" icon="el-icon-delete" @click="handleDelRule(scope.row.id)" />
+          <el-button type="danger" size="mini" icon="el-icon-delete" @click="handleDelAdmin(scope.row.id)" />
+          <el-button type="warning" size="mini" icon="el-icon-refresh" aria-placeholder="密码重置" @click="handleDelAdmin(scope.row.id)" />
         </template>
       </el-table-column>
     </el-table>
@@ -100,6 +92,7 @@
 
 <script>
 import { getAdminPage } from '@/api/admin'
+import { getGroupAll } from '@/api/group'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
 export default {
@@ -124,28 +117,58 @@ export default {
         pageSize: 20,
         groupId: '',
         search: '',
-        status: -1
-      }
+        status: ''
+      },
+      groupOptions: [],
+      statusOptions: [
+        {
+          id: 1,
+          name: '正常'
+        },
+        {
+          id: 0,
+          name: '禁用'
+        }
+      ]
     }
   },
   created() {
+    this.getList()
+    this.getGroup()
   },
   methods: {
     getList() {
       this.listLoading = true
-      getAdminPage(this.listQuery).then(res => {
+      const data = this.listQuery
+      // if (data.groupId === '') {
+      //   data.groupId = 0
+      // }
+      // if (data.status === '') {
+      //   data.status = -1
+      // }
+      getAdminPage(data).then(res => {
+        this.list = res.data.list
+        this.listLoading = false
         console.log(res)
       })
     },
-    handleAddRole() {
-      this.$router.push({ name: 'RuleAdd' })
-    },
-    handleDelRule(id) {
+    handleDelAdmin(id) {
       this.$confirm('此操作不可撤回，是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
+      })
+    },
+    handleFilter() {
+      this.listQuery.pageNum = 1
+      this.getList()
+    },
+    handleCreate() {
+    },
+    getGroup() {
+      getGroupAll('').then(res => {
+        this.groupOptions = res.data
       })
     }
   }

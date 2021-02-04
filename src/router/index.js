@@ -214,6 +214,33 @@ export const asyncRoutes = [
             hidden: true
           }
         ]
+      },
+      {
+        path: 'admin',
+        component: () => import('@/views/components-demo/index'),
+        name: 'AdminPermission',
+        redirect: '/permission/admin/index',
+        meta: {
+          title: '管理员管理',
+          icon: 'el-icon-user-solid'
+        },
+        children: [
+          {
+            path: 'index',
+            component: () => import('@/views/permission/admin/index'),
+            name: 'AdminIndex',
+            meta: {
+              title: '管理员管理'
+            }
+          },
+          {
+            path: 'edit/:id(\\d+)',
+            component: () => import('@/views/permission/admin/edit'),
+            name: 'AdminEdit',
+            meta: { title: '编辑管理员', noCache: true, activeMenu: '/permission/admin/index' },
+            hidden: true
+          }
+        ]
       }
     ]
   },

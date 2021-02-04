@@ -37,3 +37,11 @@ export function getAdminInfo(id) {
     method: 'get'
   })
 }
+
+export function updateAdmin(id, data) {
+  return request({
+    url: `/admin/edit/${id}`,
+    method: 'put',
+    data
+  })
+}
