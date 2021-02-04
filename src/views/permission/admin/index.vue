@@ -94,15 +94,17 @@
         </template>
       </el-table-column>
     </el-table>
-
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.pageNum" :limit.sync="listQuery.pageSize" @pagination="getList" />
   </div>
 </template>
 
 <script>
-import { getRules, delRule } from '@/api/rule'
+import { getAdminPage } from '@/api/admin'
+import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
 export default {
-  name: 'RulePermission',
+  name: 'AdminIndex',
+  components: { Pagination },
   filters: {
     statusFilter(status) {
       const statusMap = {
@@ -116,29 +118,27 @@ export default {
     return {
       list: [],
       total: 0,
-      listLoading: true
+      listLoading: true,
+      listQuery: {
+        pageNum: 1,
+        pageSize: 20,
+        groupId: '',
+        search: '',
+        status: -1
+      }
     }
   },
   created() {
-    this.getList()
   },
   methods: {
     getList() {
       this.listLoading = true
-      getRules().then(response => {
-        console.log(response.data)
-        this.list = response.data
-        this.listLoading = false
+      getAdminPage(this.listQuery).then(res => {
+        console.log(res)
       })
     },
     handleAddRole() {
       this.$router.push({ name: 'RuleAdd' })
-      // this.role = Object.assign({}, defaultRole)
-      // if (this.$refs.tree) {
-      //   this.$refs.tree.setCheckedNodes([])
-      // }
-      // this.dialogType = 'new'
-      // this.dialogVisible = true
     },
     handleDelRule(id) {
       this.$confirm('此操作不可撤回，是否继续?', '提示', {
@@ -146,15 +146,6 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        delRule(id).then(res => {
-          this.$notify({
-            title: '成功',
-            dangerouslyUseHTMLString: true,
-            message: '删除成功',
-            type: 'success'
-          })
-          this.getList()
-        })
       })
     }
   }
@@ -162,20 +153,5 @@ export default {
 </script>
 
 <style scoped>
-.edit-input {
-  padding-right: 100px;
-}
-.cancel-btn {
-  position: absolute;
-  right: 15px;
-  top: 10px;
-}
-</style>
 
-<style lang="scss" scoped>
-.app-container {
-  .roles-table {
-    margin-top: 30px;
-  }
-}
 </style>

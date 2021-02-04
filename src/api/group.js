@@ -45,3 +45,10 @@ export function getGroupRule(data) {
     params: data
   })
 }
+
+export function getGroupAll(search) {
+  return request({
+    url: '/group/all?search=' + search,
+    method: 'get'
+  })
+}
