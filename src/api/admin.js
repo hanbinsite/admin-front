@@ -45,3 +45,18 @@ export function updateAdmin(id, data) {
     data
   })
 }
+
+export function delAdmin(id) {
+  return request({
+    url: `/admin/del/${id}`,
+    method: 'delete'
+  })
+}
+
+export function resetPassword(data) {
+  return request({
+    url: '/admin/edit/password',
+    method: 'put',
+    params: data
+  })
+}

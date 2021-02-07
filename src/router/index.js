@@ -239,6 +239,13 @@ export const asyncRoutes = [
             name: 'AdminEdit',
             meta: { title: '编辑管理员', noCache: true, activeMenu: '/permission/admin/index' },
             hidden: true
+          },
+          {
+            path: 'add',
+            component: () => import('@/views/permission/admin/add'),
+            name: 'AdminAdd',
+            meta: { title: '新增管理员', noCache: true, activeMenu: '/permission/admin/index' },
+            hidden: true
           }
         ]
       }

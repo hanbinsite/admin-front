@@ -40,7 +40,7 @@
 
 <script>
 import { getGroupAll } from '@/api/group'
-import { updateAdmin } from '@/api/admin'
+import { addAdmin } from '@/api/admin'
 
 export default {
   name: 'AdminAdd',
@@ -70,6 +70,17 @@ export default {
         }
       }, 100)
     }
+    const checkPassword = (rule, value, callback) => {
+      const passwordReg = /^(\w){6,20}$/
+      if (!value) {
+        return callback(new Error('密码不能为空'))
+      }
+      if (passwordReg.test(value)) {
+        callback()
+      } else {
+        return callback(new Error('请输入正确的密码'))
+      }
+    }
     return {
       ruleForm: {
         status: 1,
@@ -88,7 +99,8 @@ export default {
           { required: true, message: '请输入管理员昵称', trigger: 'blur' }
         ],
         password: [
-          { required: true, message: '请输入密码', trigger: 'blur' }
+          { required: true, message: '请输入密码', trigger: 'blur' },
+          { validator: checkPassword, trigger: 'blur' }
         ],
         mobile: [
           { required: true, message: '请输入手机号', trigger: 'blur' },
@@ -116,7 +128,7 @@ export default {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           this.ruleForm['password'] = '1'
-          updateAdmin(this.id, this.ruleForm).then(res => {
+          addAdmin(this.ruleForm).then(res => {
             if (res['code'] === 1) {
               this.$notify({
                 title: '成功',
